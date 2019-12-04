@@ -13,7 +13,7 @@ var endPool = sync.Pool{
 
 // ReleaseEnd ...
 func ReleaseEnd(end *EndElement) {
-	end.reset()
+	//end.reset()
 	endPool.Put(end)
 }
 

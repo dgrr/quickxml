@@ -13,7 +13,7 @@ var startPool = sync.Pool{
 
 // ReleaseStart ...
 func ReleaseStart(start *StartElement) {
-	start.reset()
+	//start.reset()
 	startPool.Put(start)
 }
 
@@ -93,10 +93,10 @@ func (s *StartElement) parseAttrs(r *bufio.Reader) (err error) {
 }
 
 func (s *StartElement) getNextElement(idx int) *KV {
-	if n := idx - cap(s.attrs); n < 0 {
-		s.attrs = s.attrs[:cap(s.attrs)]
+	if idx < cap(s.attrs) {
+		s.attrs = s.attrs[:idx+1]
 	} else {
-		s.attrs = append(s.attrs, make([]KV, n+1)...)
+		s.attrs = append(s.attrs, make([]KV, idx+1-cap(s.attrs))...)
 	}
 
 	return &s.attrs[idx]
