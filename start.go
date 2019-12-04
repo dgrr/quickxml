@@ -43,6 +43,15 @@ func (kvs *Attrs) Range(fn func(kv *KV)) {
 	}
 }
 
+// RangePre ...
+func (kvs *Attrs) RangePre(fn func(kv *KV) bool) {
+	for _, kv := range *kvs {
+		if !fn(&kv) {
+			break
+		}
+	}
+}
+
 // RangeWithIndex ...
 func (kvs *Attrs) RangeWithIndex(fn func(i int, kv *KV)) {
 	for i, kv := range *kvs {
