@@ -36,6 +36,16 @@ func (kvs *Attrs) Get(name string) *KV {
 	return nil
 }
 
+// GetBytes ...
+func (kvs *Attrs) GetBytes(name []byte) *KV {
+	for _, kv := range *kvs {
+		if bytes.Equal(kv.KeyBytes(), name) {
+			return &kv
+		}
+	}
+	return nil
+}
+
 // Range ...
 func (kvs *Attrs) Range(fn func(kv *KV)) {
 	for _, kv := range *kvs {
@@ -57,16 +67,6 @@ func (kvs *Attrs) RangeWithIndex(fn func(i int, kv *KV)) {
 	for i, kv := range *kvs {
 		fn(i, &kv)
 	}
-}
-
-// GetBytes ...
-func (kvs *Attrs) GetBytes(name []byte) *KV {
-	for _, kv := range *kvs {
-		if bytes.Equal(kv.KeyBytes(), name) {
-			return &kv
-		}
-	}
-	return nil
 }
 
 // StartElement ...
