@@ -2,6 +2,10 @@
 
 XML is a package to process XML files in a iterative way. It doesn't use reflect so you'll need to work a little more :D
 
+**IMPORTANT NOTE: This package doesn't provide a fully featured XML. It has been created for XLSX parsing.**
+
+PRs are welcome.
+
 ```go
 package main
 
