@@ -59,9 +59,6 @@ func (r *Reader) Next() bool {
 			break
 		}
 	}
-	if r.err == io.EOF {
-		r.err = nil
-	}
 
 	return r.e != nil
 }

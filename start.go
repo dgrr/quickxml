@@ -43,6 +43,9 @@ func (s *StartElement) parseAttrs(r *bufio.Reader) (err error) {
 		if err != nil || c == '>' {
 			break
 		}
+		if c == '/' {
+			continue
+		}
 		r.UnreadByte()
 
 		// read key
