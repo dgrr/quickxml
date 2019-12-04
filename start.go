@@ -2,6 +2,7 @@ package xml
 
 import (
 	"bufio"
+	"bytes"
 	"sync"
 )
 
@@ -17,10 +18,52 @@ func ReleaseStart(start *StartElement) {
 	startPool.Put(start)
 }
 
+// Attrs ...
+type Attrs []KV
+
+// Len ...
+func (kvs *Attrs) Len() int {
+	return len(*kvs)
+}
+
+// Get ...
+func (kvs *Attrs) Get(name string) *KV {
+	for _, kv := range *kvs {
+		if kv.Key() == name {
+			return &kv
+		}
+	}
+	return nil
+}
+
+// Range ...
+func (kvs *Attrs) Range(fn func(kv *KV)) {
+	for _, kv := range *kvs {
+		fn(&kv)
+	}
+}
+
+// RangeWithIndex ...
+func (kvs *Attrs) RangeWithIndex(fn func(i int, kv *KV)) {
+	for i, kv := range *kvs {
+		fn(i, &kv)
+	}
+}
+
+// GetBytes ...
+func (kvs *Attrs) GetBytes(name []byte) *KV {
+	for _, kv := range *kvs {
+		if bytes.Equal(kv.KeyBytes(), name) {
+			return &kv
+		}
+	}
+	return nil
+}
+
 // StartElement ...
 type StartElement struct {
 	name  []byte
-	attrs []KV
+	attrs Attrs
 }
 
 // Name ...
@@ -34,8 +77,8 @@ func (s *StartElement) NameBytes() []byte {
 }
 
 // Attrs ...
-func (s *StartElement) Attrs() []KV {
-	return s.attrs
+func (s *StartElement) Attrs() *Attrs {
+	return &s.attrs
 }
 
 func (s *StartElement) reset() {

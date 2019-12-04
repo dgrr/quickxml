@@ -15,6 +15,7 @@ type Reader struct {
 	r   *bufio.Reader
 	err error
 	e   Element
+	n   *string
 }
 
 // NewReader ...
@@ -50,8 +51,13 @@ func (r *Reader) Next() bool {
 				if err != nil {
 					r.err = err
 				} else {
-					tt := TextElement(t[:len(t)-1])
-					r.e = &tt
+					t = t[:len(t)-1]
+					if r.n != nil {
+						*r.n, r.n = t, nil
+					} else {
+						tt := TextElement(t)
+						r.e = &tt
+					}
 					r.r.UnreadByte()
 				}
 			}
@@ -62,6 +68,11 @@ func (r *Reader) Next() bool {
 	}
 
 	return r.e != nil
+}
+
+// AssignNext ...
+func (r *Reader) AssignNext(ptr *string) {
+	r.n = ptr
 }
 
 // skip reads until the next end tag '>'
