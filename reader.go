@@ -77,13 +77,13 @@ func (r *Reader) next() {
 	if r.err == nil {
 		switch c {
 		case '/':
-			r.e = new(EndElement)
+			r.e = endPool.Get().(*EndElement)
 		case '!':
 			r.err = r.skip()
 		case '?':
 			r.err = r.skip()
 		default:
-			r.e = new(StartElement)
+			r.e = startPool.Get().(*StartElement)
 			r.r.UnreadByte()
 		}
 		if r.err == nil && r.e != nil {

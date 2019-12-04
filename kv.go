@@ -2,19 +2,47 @@ package xml
 
 import (
 	"bufio"
-	"strings"
+	"bytes"
 )
 
 // KV ...
 type KV struct {
-	K, V string
+	k, v []byte
 }
 
-func (kv *KV) parse(r *bufio.Reader) (err error) {
-	kv.K, err = r.ReadString('=')
+// Key ...
+func (kv *KV) Key() string {
+	return string(kv.k)
+}
+
+// KeyBytes ...
+func (kv *KV) KeyBytes() []byte {
+	return kv.k
+}
+
+// Value ...
+func (kv *KV) Value() string {
+	return string(kv.v)
+}
+
+// ValueBytes ...
+func (kv *KV) ValueBytes() []byte {
+	return kv.v
+}
+
+func (kv *KV) reset() {
+	kv.k = kv.k[:0]
+	kv.v = kv.v[:0]
+}
+
+func (kv *KV) parse(r *bufio.Reader) error {
+	k, err := r.ReadBytes('=')
 	if err == nil {
-		kv.K = strings.TrimRight(kv.K[:len(kv.K)-1], " \r\n")
-		var c byte
+		kv.k = append(kv.k[:0], bytes.TrimRight(k[:len(k)-1], " \r\n")...)
+		var (
+			c byte
+			v []byte
+		)
 	loop:
 		for {
 			c, err = skipWS(r)
@@ -24,13 +52,13 @@ func (kv *KV) parse(r *bufio.Reader) (err error) {
 
 			switch c {
 			case '"':
-				kv.V, err = r.ReadString('"')
+				v, err = r.ReadBytes('"')
 				if err == nil {
-					kv.V = strings.Trim(kv.V[:len(kv.V)-1], " ")
+					kv.v = append(kv.v[:0], v[:len(v)-1]...)
 				}
 				break loop
 			}
 		}
 	}
-	return
+	return err
 }

@@ -1,6 +1,7 @@
 package xml
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"testing"
@@ -9,7 +10,7 @@ import (
 func TestReaderBasic(t *testing.T) {
 	const str = `<?xml version="1.0" encoding="UTF-8"?>
 	<first>
-		<second k="v">text</second>
+		<second k="v" k2="v2">text</second>
 	</first>`
 
 	start := []string{"first", "second"}
@@ -20,8 +21,12 @@ func TestReaderBasic(t *testing.T) {
 	attrs := map[int][]KV{
 		1: []KV{
 			{
-				K: "k",
-				V: "v",
+				k: []byte("k"),
+				v: []byte("v"),
+			},
+			{
+				k: []byte("k2"),
+				v: []byte("v2"),
 			},
 		},
 	}
@@ -32,20 +37,21 @@ func TestReaderBasic(t *testing.T) {
 	for r.Next() {
 		switch e := r.Element().(type) {
 		case *StartElement:
-			if e.Name != start[starti] {
-				t.Fatalf("Unexpected StartElement: got `%s`. Expected `%s`", e.Name, start[starti])
+			if e.Name() != start[starti] {
+				t.Fatalf("Unexpected StartElement: got `%s`. Expected `%s`", e.Name(), start[starti])
 			}
 			ekv, ok := attrs[starti]
 			if ok {
-				for i, kv := range e.Attrs {
-					if ekv[i].K != kv.K {
-						t.Fatalf("Unexpected Attr Key on %d: got `%s`. Expected `%s`", i, kv.K, ekv[i].K)
+				for i, kv := range e.Attrs() {
+					if !bytes.Equal(ekv[i].KeyBytes(), kv.KeyBytes()) {
+						t.Fatalf("Unexpected Attr Key on %d: got `%s`. Expected `%s`. Len %d", i, kv.Key(), ekv[i].Key(), len(e.Attrs()))
 					}
-					if ekv[i].V != kv.V {
-						t.Fatalf("Unexpected Attr Value on %d: got `%s`. Expected `%s`", i, kv.V, ekv[i].V)
+					if !bytes.Equal(ekv[i].ValueBytes(), kv.ValueBytes()) {
+						t.Fatalf("Unexpected Attr Value on %d: got `%s`. Expected `%s`", i, kv.Value(), ekv[i].Value())
 					}
 				}
 			}
+			ReleaseStart(e)
 			starti++
 		case *TextElement:
 			s, ok := text[starti]
@@ -56,9 +62,10 @@ func TestReaderBasic(t *testing.T) {
 			}
 		case *EndElement:
 			starti--
-			if e.Name != start[starti] {
-				t.Fatalf("Unexpected EndElement: got `%s`. Expected `%s`", e.Name, start[starti])
+			if e.Name() != start[starti] {
+				t.Fatalf("Unexpected EndElement: got `%s`. Expected `%s`", e.Name(), start[starti])
 			}
+			ReleaseEnd(e)
 		}
 	}
 }
@@ -105,17 +112,19 @@ func TestReaderComplex(t *testing.T) {
 	for r.Next() {
 		switch e := r.Element().(type) {
 		case *StartElement:
-			fmt.Printf("%s<%s", spaces, e.Name)
-			for _, kv := range e.Attrs {
-				fmt.Printf(` %s="%s"`, kv.K, kv.V)
+			fmt.Printf("%s<%s", spaces, e.Name())
+			for _, kv := range e.Attrs() {
+				fmt.Printf(` %s="%s"`, kv.Key(), kv.Value())
 			}
 			fmt.Println(">")
 			spaces += "  "
+			ReleaseStart(e)
 		case *TextElement:
 			fmt.Printf("%s%s\n", spaces, *e)
 		case *EndElement:
 			spaces = spaces[:len(spaces)-2]
-			fmt.Printf("%s</%s>\n", spaces, e.Name)
+			fmt.Printf("%s</%s>\n", spaces, e.Name())
+			ReleaseEnd(e)
 		}
 	}
 }

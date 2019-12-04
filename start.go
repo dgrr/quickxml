@@ -2,12 +2,45 @@ package xml
 
 import (
 	"bufio"
+	"sync"
 )
+
+var startPool = sync.Pool{
+	New: func() interface{} {
+		return new(StartElement)
+	},
+}
+
+// ReleaseStart ...
+func ReleaseStart(start *StartElement) {
+	start.reset()
+	startPool.Put(start)
+}
 
 // StartElement ...
 type StartElement struct {
-	Name  string
-	Attrs []*KV
+	name  []byte
+	attrs []KV
+}
+
+// Name ...
+func (s *StartElement) Name() string {
+	return string(s.name)
+}
+
+// NameBytes ...
+func (s *StartElement) NameBytes() []byte {
+	return s.name
+}
+
+// Attrs ...
+func (s *StartElement) Attrs() []KV {
+	return s.attrs
+}
+
+func (s *StartElement) reset() {
+	s.name = s.name[:0]
+	s.attrs = s.attrs[:0]
 }
 
 func (s *StartElement) parse(r *bufio.Reader) error {
@@ -15,7 +48,7 @@ func (s *StartElement) parse(r *bufio.Reader) error {
 	if err != nil {
 		return err
 	}
-	s.Name += string(c)
+	s.name = append(s.name[:0], c)
 loop:
 	for {
 		c, err = r.ReadByte()
@@ -26,10 +59,11 @@ loop:
 		case ' ', '>': // read until the first space or reaching the end
 			break loop
 		default:
-			s.Name += string(c)
+			s.name = append(s.name, c)
 		}
 	}
 	if c == ' ' && err == nil { // doesn't reach the end
+		s.attrs = s.attrs[:0]
 		err = s.parseAttrs(r)
 	}
 
@@ -38,6 +72,7 @@ loop:
 
 func (s *StartElement) parseAttrs(r *bufio.Reader) (err error) {
 	var c byte
+	idx := 0
 	for {
 		c, err = skipWS(r) // skip whitespaces until reaching the key
 		if err != nil || c == '>' {
@@ -49,11 +84,20 @@ func (s *StartElement) parseAttrs(r *bufio.Reader) (err error) {
 		r.UnreadByte()
 
 		// read key
-		kv := new(KV)
-		err = kv.parse(r)
+		err = s.getNextElement(idx).parse(r)
 		if err == nil {
-			s.Attrs = append(s.Attrs, kv)
+			idx++
 		}
 	}
 	return
+}
+
+func (s *StartElement) getNextElement(idx int) *KV {
+	if n := idx - cap(s.attrs); n < 0 {
+		s.attrs = s.attrs[:cap(s.attrs)]
+	} else {
+		s.attrs = append(s.attrs, make([]KV, n+1)...)
+	}
+
+	return &s.attrs[idx]
 }

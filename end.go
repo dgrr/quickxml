@@ -1,10 +1,39 @@
 package xml
 
-import "bufio"
+import (
+	"bufio"
+	"sync"
+)
+
+var endPool = sync.Pool{
+	New: func() interface{} {
+		return new(EndElement)
+	},
+}
+
+// ReleaseEnd ...
+func ReleaseEnd(end *EndElement) {
+	end.reset()
+	endPool.Put(end)
+}
 
 // EndElement ...
 type EndElement struct {
-	Name string
+	name []byte
+}
+
+func (e *EndElement) reset() {
+	e.name = e.name[:0]
+}
+
+// Name ...
+func (e *EndElement) Name() string {
+	return string(e.name)
+}
+
+// NameBytes ...
+func (e *EndElement) NameBytes() []byte {
+	return e.name
 }
 
 func (e *EndElement) parse(r *bufio.Reader) error {
@@ -12,7 +41,7 @@ func (e *EndElement) parse(r *bufio.Reader) error {
 	if err != nil {
 		return err
 	}
-	e.Name += string(c)
+	e.name = append(e.name[:0], c)
 	for {
 		c, err = r.ReadByte()
 		if err != nil {
@@ -24,7 +53,7 @@ func (e *EndElement) parse(r *bufio.Reader) error {
 		if c == ' ' {
 			continue
 		}
-		e.Name += string(c)
+		e.name = append(e.name, c)
 	}
 
 	return err
