@@ -45,11 +45,12 @@ func (r *Reader) Next() bool {
 			case '<': // new element
 				r.next()
 			default: // text string
+				r.r.UnreadByte()
 				t, err := r.r.ReadString('<') // read until a new element starts (or EOF is reached)
 				if err != nil {
 					r.err = err
 				} else {
-					tt := TextElement(string(c) + t[:len(t)-1])
+					tt := TextElement(t[:len(t)-1])
 					r.e = &tt
 					r.r.UnreadByte()
 				}
