@@ -7,7 +7,7 @@ import (
 	"github.com/dgrr/xml"
 )
 
-// Book ...
+// Book represents our XML structure
 type Book struct {
 	Category string
 	Title    string
@@ -16,6 +16,7 @@ type Book struct {
 	Price    string
 }
 
+// String will print the book info in a string (for fmt)
 func (book Book) String() string {
 	return fmt.Sprintf(
 		"%s\n  Title: %s\n  Author: %s\n  Year: %s\n  Price: %s",
@@ -66,13 +67,14 @@ func main() {
 		switch e := r.Element().(type) {
 		case *xml.StartElement:
 			switch e.Name() {
-			case "book":
+			case "book": // start reading a book
 				attr := e.Attrs().Get("category")
 				if attr != nil {
 					book.Category = attr.Value()
 				}
-			case "title":
+			case "title": // You can capture the lang too using e.Attrs()
 				r.AssignNext(&book.Title)
+				// AssignNext will assign the next text found to book.Title
 			case "author":
 				r.AssignNext(&book.Author)
 			case "year":
