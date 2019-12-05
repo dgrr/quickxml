@@ -31,7 +31,7 @@ func (kvs *Attrs) Len() int {
 // If the name doesn't match any of the keys KV will be nil.
 func (kvs *Attrs) Get(name string) *KV {
 	for _, kv := range *kvs {
-		if kv.Key() == name {
+		if kv.KeyUnsafe() == name {
 			return &kv
 		}
 	}
