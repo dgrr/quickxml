@@ -5,12 +5,17 @@ import (
 	"io"
 )
 
-// Element ...
+// Element represents a XML element.
+//
+// Element can be:
+// - StartElement.
+// - EndElement.
+// - TextElement.
 type Element interface {
 	parse(r *bufio.Reader) error
 }
 
-// Reader ...
+// Reader represents a XML reader.
 type Reader struct {
 	r   *bufio.Reader
 	err error
@@ -18,24 +23,24 @@ type Reader struct {
 	n   *string
 }
 
-// NewReader ...
+// NewReader returns a initialized reader.
 func NewReader(r io.Reader) *Reader {
 	return &Reader{
 		r: bufio.NewReader(r),
 	}
 }
 
-// Element ...
+// Element returns the last readed element.
 func (r *Reader) Element() Element {
 	return r.e
 }
 
-// Err ...
-func (r *Reader) Err() error {
+// Error return the last error.
+func (r *Reader) Error() error {
 	return r.err
 }
 
-// Next ...
+// Next iterates until the next XML element.
 func (r *Reader) Next() bool {
 	var c byte
 	r.e = nil
@@ -67,10 +72,10 @@ func (r *Reader) Next() bool {
 		}
 	}
 
-	return r.e != nil
+	return r.e != nil && r.err == nil
 }
 
-// AssignNext ...
+// AssignNext will assign the next TextElement to ptr.
 func (r *Reader) AssignNext(ptr *string) {
 	r.n = ptr
 }

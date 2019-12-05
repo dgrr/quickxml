@@ -2,7 +2,7 @@ package xml
 
 import "bufio"
 
-// TextElement ...
+// TextElement represents a XML text.
 type TextElement string
 
 func (t *TextElement) parse(_ *bufio.Reader) error {

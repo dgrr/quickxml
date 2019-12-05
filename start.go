@@ -12,21 +12,23 @@ var startPool = sync.Pool{
 	},
 }
 
-// ReleaseStart ...
+// ReleaseStart returns the StartElement to the pool.
 func ReleaseStart(start *StartElement) {
 	//start.reset()
 	startPool.Put(start)
 }
 
-// Attrs ...
+// Attrs represents the attributes of an XML StartElement.
 type Attrs []KV
 
-// Len ...
+// Len returns the number of attributes.
 func (kvs *Attrs) Len() int {
 	return len(*kvs)
 }
 
-// Get ...
+// Get returns the attribute based on name.
+//
+// If the name doesn't match any of the keys KV will be nil.
 func (kvs *Attrs) Get(name string) *KV {
 	for _, kv := range *kvs {
 		if kv.Key() == name {
@@ -36,7 +38,9 @@ func (kvs *Attrs) Get(name string) *KV {
 	return nil
 }
 
-// GetBytes ...
+// GetBytes returns the attribute based on name.
+//
+// If the name doesn't match any of the keys KV will be nil.
 func (kvs *Attrs) GetBytes(name []byte) *KV {
 	for _, kv := range *kvs {
 		if bytes.Equal(kv.KeyBytes(), name) {
@@ -46,14 +50,16 @@ func (kvs *Attrs) GetBytes(name []byte) *KV {
 	return nil
 }
 
-// Range ...
+// Range passes every attr to fn.
 func (kvs *Attrs) Range(fn func(kv *KV)) {
 	for _, kv := range *kvs {
 		fn(&kv)
 	}
 }
 
-// RangePre ...
+// RangePre passes every attr to fn.
+//
+// If fn returns false the range loop will break.
 func (kvs *Attrs) RangePre(fn func(kv *KV) bool) {
 	for _, kv := range *kvs {
 		if !fn(&kv) {
@@ -62,30 +68,30 @@ func (kvs *Attrs) RangePre(fn func(kv *KV) bool) {
 	}
 }
 
-// RangeWithIndex ...
+// RangeWithIndex passes every attr and the index to fn.
 func (kvs *Attrs) RangeWithIndex(fn func(i int, kv *KV)) {
 	for i, kv := range *kvs {
 		fn(i, &kv)
 	}
 }
 
-// StartElement ...
+// StartElement represents the start of a XML node.
 type StartElement struct {
 	name  []byte
 	attrs Attrs
 }
 
-// Name ...
+// Name returns the name of the element.
 func (s *StartElement) Name() string {
 	return string(s.name)
 }
 
-// NameBytes ...
+// NameBytes returns the name of the element.
 func (s *StartElement) NameBytes() []byte {
 	return s.name
 }
 
-// Attrs ...
+// Attrs returns the attributes of an element.
 func (s *StartElement) Attrs() *Attrs {
 	return &s.attrs
 }

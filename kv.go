@@ -5,27 +5,27 @@ import (
 	"bytes"
 )
 
-// KV ...
+// KV represents an attr which is a key-value pair.
 type KV struct {
 	k, v []byte
 }
 
-// Key ...
+// Key returns the key.
 func (kv *KV) Key() string {
 	return string(kv.k)
 }
 
-// KeyBytes ...
+// KeyBytes returns the key.
 func (kv *KV) KeyBytes() []byte {
 	return kv.k
 }
 
-// Value ...
+// Value returns the value.
 func (kv *KV) Value() string {
 	return string(kv.v)
 }
 
-// ValueBytes ...
+// ValueBytes returns the value.
 func (kv *KV) ValueBytes() []byte {
 	return kv.v
 }

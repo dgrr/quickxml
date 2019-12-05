@@ -8,9 +8,9 @@ import (
 
 func TestReaderBasic(t *testing.T) {
 	const str = `<?xml version="1.0" encoding="UTF-8"?>
-	<first>
-		<second k="v" k2="v2">text</second>
-	</first>`
+	<   first  >
+		<  second     k  =  "v"    k2  =  "v2"   >text<  /  second  >
+	<  /  first  >`
 
 	start := []string{"first", "second"}
 	text := map[int]string{

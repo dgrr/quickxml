@@ -11,13 +11,13 @@ var endPool = sync.Pool{
 	},
 }
 
-// ReleaseEnd ...
+// ReleaseEnd returns an EndElement to the pool.
 func ReleaseEnd(end *EndElement) {
 	//end.reset()
 	endPool.Put(end)
 }
 
-// EndElement ...
+// EndElement represents a XML end element.
 type EndElement struct {
 	name []byte
 }
@@ -26,12 +26,12 @@ func (e *EndElement) reset() {
 	e.name = e.name[:0]
 }
 
-// Name ...
+// Name returns the name of the XML node.
 func (e *EndElement) Name() string {
 	return string(e.name)
 }
 
-// NameBytes ...
+// NameBytes returns the name of the XML node in bytes.
 func (e *EndElement) NameBytes() []byte {
 	return e.name
 }
