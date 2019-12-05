@@ -18,7 +18,7 @@ func TestReaderBasic(t *testing.T) {
 	}
 
 	attrs := map[int][]KV{
-		1: []KV{
+		1: {
 			{
 				k: []byte("k"),
 				v: []byte("v"),
