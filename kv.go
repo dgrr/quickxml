@@ -20,6 +20,13 @@ func (kv *KV) KeyBytes() []byte {
 	return kv.k
 }
 
+// KeyUnsafe returns a string holding the name parameter.
+//
+// This function differs from Key() on using unsafe methods.
+func (kv *KV) KeyUnsafe() string {
+	return b2s(kv.k)
+}
+
 // Value returns the value.
 func (kv *KV) Value() string {
 	return string(kv.v)
@@ -28,6 +35,13 @@ func (kv *KV) Value() string {
 // ValueBytes returns the value.
 func (kv *KV) ValueBytes() []byte {
 	return kv.v
+}
+
+// ValueUnsafe returns a string holding the name parameter.
+//
+// This function differs from Value() on using unsafe methods.
+func (kv *KV) ValueUnsafe() string {
+	return b2s(kv.v)
 }
 
 func (kv *KV) reset() {

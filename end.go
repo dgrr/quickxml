@@ -36,6 +36,13 @@ func (e *EndElement) NameBytes() []byte {
 	return e.name
 }
 
+// NameUnsafe returns a string holding the name parameter.
+//
+// This function differs from Name() on using unsafe methods.
+func (e *EndElement) NameUnsafe() string {
+	return b2s(e.name)
+}
+
 func (e *EndElement) parse(r *bufio.Reader) error {
 	c, err := skipWS(r)
 	if err != nil {

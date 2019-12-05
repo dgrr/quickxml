@@ -91,6 +91,13 @@ func (s *StartElement) NameBytes() []byte {
 	return s.name
 }
 
+// NameUnsafe returns a string holding the name parameter.
+//
+// This function differs from Name() on using unsafe methods.
+func (s *StartElement) NameUnsafe() string {
+	return b2s(s.name)
+}
+
 // Attrs returns the attributes of an element.
 func (s *StartElement) Attrs() *Attrs {
 	return &s.attrs

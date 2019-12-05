@@ -1,6 +1,9 @@
 package xml
 
-import "bufio"
+import (
+	"bufio"
+	"unsafe"
+)
 
 func skipWS(r *bufio.Reader) (c byte, err error) {
 	for {
@@ -10,4 +13,8 @@ func skipWS(r *bufio.Reader) (c byte, err error) {
 		}
 	}
 	return
+}
+
+func b2s(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
 }
