@@ -77,8 +77,15 @@ func (kvs *Attrs) RangeWithIndex(fn func(i int, kv *KV)) {
 
 // StartElement represents the start of a XML node.
 type StartElement struct {
-	name  []byte
-	attrs Attrs
+	name   []byte
+	attrs  Attrs
+	hasEnd bool
+}
+
+// HasEnd indicates if the StartElement ends as />
+// Having this true means we do not expect a EndElement.
+func (s *StartElement) HasEnd() bool {
+	return s.hasEnd
 }
 
 // Name returns the name of the element.
@@ -121,9 +128,14 @@ loop:
 			break
 		}
 		switch c {
+		case '/':
+			s.hasEnd = true
 		case ' ', '>': // read until the first space or reaching the end
 			break loop
 		default:
+			if s.hasEnd { // malformed ??
+				continue
+			}
 			s.name = append(s.name, c)
 		}
 	}

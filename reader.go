@@ -44,7 +44,7 @@ func (r *Reader) Error() error {
 func (r *Reader) Next() bool {
 	var c byte
 	r.e = nil
-	for r.e == nil {
+	for r.e == nil && r.err == nil {
 		c, r.err = skipWS(r.r)
 		if r.err == nil {
 			switch c { // get next token
@@ -66,9 +66,6 @@ func (r *Reader) Next() bool {
 					r.r.UnreadByte()
 				}
 			}
-		}
-		if r.err != nil {
-			break
 		}
 	}
 
