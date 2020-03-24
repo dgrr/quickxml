@@ -3,6 +3,7 @@ package xml
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"sync"
 )
 
@@ -82,6 +83,19 @@ type StartElement struct {
 	hasEnd bool
 }
 
+func (s *StartElement) String() string {
+	str := fmt.Sprintf("<%s", s.name)
+	s.attrs.Range(func(kv *KV) {
+		str += fmt.Sprintf(` %s="%s"`, kv.Key(), kv.Value())
+	})
+	if s.hasEnd {
+		str += " />"
+	} else {
+		str += ">"
+	}
+	return str
+}
+
 // HasEnd indicates if the StartElement ends as />
 // Having this true means we do not expect a EndElement.
 func (s *StartElement) HasEnd() bool {
@@ -113,9 +127,12 @@ func (s *StartElement) Attrs() *Attrs {
 func (s *StartElement) reset() {
 	s.name = s.name[:0]
 	s.attrs = s.attrs[:0]
+	s.hasEnd = false
 }
 
 func (s *StartElement) parse(r *bufio.Reader) error {
+	s.reset()
+
 	c, err := skipWS(r) // skip any whitespaces
 	if err != nil {
 		return err
