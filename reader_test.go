@@ -68,3 +68,26 @@ func TestReaderBasic(t *testing.T) {
 		}
 	}
 }
+
+func TestXMLContentType(t *testing.T) {
+	const xmlStr = `<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+
+  <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+    <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+    <Override PartName="/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+    <Override PartName="/xl/worksheets/data.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+    <Override PartName="/stylesheet.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`
+
+	lookFor := `application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml`
+
+	r := NewReader(strings.NewReader(xmlStr))
+	for r.Next() {
+		if se, ok := r.Element().(*StartElement); ok {
+			if kv := se.Attrs().Get("ContentType"); kv != nil && kv.Value() == lookFor {
+				return
+			}
+		}
+	}
+
+	t.Fatalf("%s not found", lookFor)
+}
