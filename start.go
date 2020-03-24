@@ -121,17 +121,19 @@ func (s *StartElement) parse(r *bufio.Reader) error {
 		return err
 	}
 	s.name = append(s.name[:0], c)
-loop:
+
 	for {
 		c, err = r.ReadByte()
 		if err != nil {
 			break
 		}
+		if c == ' ' || c == '>' {
+			break
+		}
+
 		switch c {
 		case '/':
 			s.hasEnd = true
-		case ' ', '>': // read until the first space or reaching the end
-			break loop
 		default:
 			if s.hasEnd { // malformed ??
 				continue
@@ -156,6 +158,7 @@ func (s *StartElement) parseAttrs(r *bufio.Reader) (err error) {
 			break
 		}
 		if c == '/' {
+			s.hasEnd = true
 			continue
 		}
 		r.UnreadByte()
