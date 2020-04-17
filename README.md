@@ -1,6 +1,7 @@
 # XML
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/dgrr/xml)](https://goreportcard.com/report/github.com/dgrr/xml)
+[![Build Status](https://travis-ci.com/dgrr/xml.svg?branch=master)](https://travis-ci.com/dgrr/xml)
 
 XML is a package to process XML files in a iterative way. It doesn't use reflect so you'll need to work a little more :D
 
