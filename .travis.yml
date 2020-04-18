@@ -1,8 +1,5 @@
 language: go
 
-ignore:
-  - examples/
-
 before_install:
     - go get -t -v ./...
 
