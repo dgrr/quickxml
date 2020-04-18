@@ -2,6 +2,7 @@ package xml
 
 import (
 	"bufio"
+	"fmt"
 	"sync"
 )
 
@@ -13,7 +14,7 @@ var endPool = sync.Pool{
 
 // ReleaseEnd returns an EndElement to the pool.
 func ReleaseEnd(end *EndElement) {
-	//end.reset()
+	end.Reset()
 	endPool.Put(end)
 }
 
@@ -22,7 +23,29 @@ type EndElement struct {
 	name []byte
 }
 
-func (e *EndElement) reset() {
+// NewEnd creates a new EndElement.
+func NewEnd(name string) *EndElement {
+	return &EndElement{
+		name: []byte(name),
+	}
+}
+
+// String returns the string representation of EndElement.
+func (e *EndElement) String() string {
+	return fmt.Sprintf("</%s>", e.name)
+}
+
+// SetName sets the name to the end element.
+func (e *EndElement) SetName(name string) {
+	e.name = []byte(name)
+}
+
+// SetNameBytes sets the name to the end element in bytes.
+func (e *EndElement) SetNameBytes(name []byte) {
+	e.name = append(e.name[:0], name...)
+}
+
+func (e *EndElement) Reset() {
 	e.name = e.name[:0]
 }
 

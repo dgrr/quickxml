@@ -5,16 +5,6 @@ import (
 	"io"
 )
 
-// Element represents a XML element.
-//
-// Element can be:
-// - StartElement.
-// - EndElement.
-// - TextElement.
-type Element interface {
-	parse(r *bufio.Reader) error
-}
-
 // Reader represents a XML reader.
 type Reader struct {
 	r   *bufio.Reader

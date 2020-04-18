@@ -22,6 +22,39 @@ func ReleaseStart(start *StartElement) {
 // Attrs represents the attributes of an XML StartElement.
 type Attrs []KV
 
+// NewAttr creates a new attribyte list.
+//
+// The attributes are a key-value pair of strings.
+// For example: NewAttrs("k", "v") will create the attr k="v".
+//
+// If the attrs are odd nothing happens. The value associated
+// with that key will be empty.
+func NewAttrs(attrs ...string) *Attrs {
+	att := make(Attrs, (len(attrs)/2)+(1&len(attrs)))
+
+	for i, attr := range attrs {
+		if i&1 == 0 {
+			att[i/2].k = append(att[i/2].k, attr...)
+		} else {
+			att[i/2].v = append(att[i/2].v, attr...)
+		}
+	}
+
+	return &att
+}
+
+// CopyTo copies kvs to kv2.
+func (kvs *Attrs) CopyTo(kv2 *Attrs) {
+	if n := len(*kvs) - len(*kv2); n > 0 {
+		*kv2 = append(*kv2, make([]KV, n)...)
+	}
+
+	kvs.RangeWithIndex(func(i int, kv *KV) {
+		(*kv2)[i].k = append((*kv2)[i].k[:0], kv.k...)
+		(*kv2)[i].v = append((*kv2)[i].v[:0], kv.v...)
+	})
+}
+
 // Len returns the number of attributes.
 func (kvs *Attrs) Len() int {
 	return len(*kvs)
@@ -83,13 +116,26 @@ type StartElement struct {
 	hasEnd bool
 }
 
+// NewStart creats a new StartElement.
+func NewStart(name string, hasEnd bool, attrs *Attrs) *StartElement {
+	s := &StartElement{
+		name:   []byte(name),
+		hasEnd: hasEnd,
+	}
+	if attrs != nil {
+		attrs.CopyTo(&s.attrs)
+	}
+
+	return s
+}
+
 func (s *StartElement) String() string {
 	str := fmt.Sprintf("<%s", s.name)
 	s.attrs.Range(func(kv *KV) {
 		str += fmt.Sprintf(` %s="%s"`, kv.Key(), kv.Value())
 	})
 	if s.hasEnd {
-		str += " />"
+		str += "/>"
 	} else {
 		str += ">"
 	}
@@ -105,6 +151,16 @@ func (s *StartElement) HasEnd() bool {
 // Name returns the name of the element.
 func (s *StartElement) Name() string {
 	return string(s.name)
+}
+
+// SetName sets a string as StartElement's name.
+func (s *StartElement) SetName(name string) {
+	s.name = []byte(name)
+}
+
+// SetNameBytes sets the name bytes to the StartElement.
+func (s *StartElement) SetNameBytes(name []byte) {
+	s.name = append(s.name[:0], name...)
 }
 
 // NameBytes returns the name of the element.
@@ -124,14 +180,15 @@ func (s *StartElement) Attrs() *Attrs {
 	return &s.attrs
 }
 
-func (s *StartElement) reset() {
+// Reset sets the default values to the StartElement.
+func (s *StartElement) Reset() {
 	s.name = s.name[:0]
 	s.attrs = s.attrs[:0]
 	s.hasEnd = false
 }
 
 func (s *StartElement) parse(r *bufio.Reader) error {
-	s.reset()
+	s.Reset()
 
 	c, err := skipWS(r) // skip any whitespaces
 	if err != nil {
