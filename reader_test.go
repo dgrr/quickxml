@@ -52,7 +52,6 @@ func TestReaderBasic(t *testing.T) {
 					}
 				})
 			}
-			ReleaseStart(e)
 			starti++
 		case *TextElement:
 			s, ok := text[starti]
@@ -66,7 +65,6 @@ func TestReaderBasic(t *testing.T) {
 			if e.Name() != start[starti] {
 				t.Fatalf("Unexpected EndElement: got `%s`. Expected `%s`", e.Name(), start[starti])
 			}
-			ReleaseEnd(e)
 		}
 	}
 }
@@ -194,12 +192,10 @@ func benchFastXML(b *testing.B, r *Reader) {
 			case "p:price":
 				r.AssignNext(&book.Price)
 			}
-			ReleaseStart(e)
 		case *EndElement:
 			if e.Name() == "book" { // book parsed
 				books++
 			}
-			ReleaseEnd(e)
 		}
 	}
 	if r.Error() != nil && r.Error() != io.EOF {

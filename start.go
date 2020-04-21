@@ -13,8 +13,8 @@ var startPool = sync.Pool{
 	},
 }
 
-// ReleaseStart returns the StartElement to the pool.
-func ReleaseStart(start *StartElement) {
+// releaseStart returns the StartElement to the pool.
+func releaseStart(start *StartElement) {
 	//start.reset()
 	startPool.Put(start)
 }
@@ -194,7 +194,7 @@ func (s *StartElement) parse(r *bufio.Reader) error {
 	if err != nil {
 		return err
 	}
-	s.name = append(s.name[:0], c)
+	s.name = append(s.name, c)
 
 	for {
 		c, err = r.ReadByte()

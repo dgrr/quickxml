@@ -12,9 +12,9 @@ var endPool = sync.Pool{
 	},
 }
 
-// ReleaseEnd returns an EndElement to the pool.
-func ReleaseEnd(end *EndElement) {
-	end.Reset()
+// releaseEnd returns an EndElement to the pool.
+func releaseEnd(end *EndElement) {
+	//end.Reset()
 	endPool.Put(end)
 }
 
@@ -37,7 +37,7 @@ func (e *EndElement) String() string {
 
 // SetName sets the name to the end element.
 func (e *EndElement) SetName(name string) {
-	e.name = []byte(name)
+	e.name = append(e.name[:0], name...)
 }
 
 // SetNameBytes sets the name to the end element in bytes.
@@ -67,11 +67,13 @@ func (e *EndElement) NameUnsafe() string {
 }
 
 func (e *EndElement) parse(r *bufio.Reader) error {
+	e.Reset()
+
 	c, err := skipWS(r)
 	if err != nil {
 		return err
 	}
-	e.name = append(e.name[:0], c)
+	e.name = append(e.name, c)
 	for {
 		c, err = r.ReadByte()
 		if err != nil {

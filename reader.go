@@ -30,10 +30,24 @@ func (r *Reader) Error() error {
 	return r.err
 }
 
+func (r *Reader) release() {
+	if r.e == nil {
+		return
+	}
+
+	if e, ok := r.e.(*StartElement); ok {
+		releaseStart(e)
+	} else if e, ok := r.e.(*EndElement); ok {
+		releaseEnd(e)
+	}
+	r.e = nil
+}
+
 // Next iterates until the next XML element.
 func (r *Reader) Next() bool {
+	r.release()
+
 	var c byte
-	r.e = nil
 	for r.e == nil && r.err == nil {
 		c, r.err = skipWS(r.r)
 		if r.err == nil {
