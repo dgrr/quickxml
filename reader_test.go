@@ -2,6 +2,8 @@ package xml
 
 import (
 	"bytes"
+	"encoding/xml"
+	"io"
 	"strings"
 	"testing"
 )
@@ -90,4 +92,172 @@ func TestXMLContentType(t *testing.T) {
 	}
 
 	t.Fatalf("%s not found", lookFor)
+}
+
+// benchmark
+// Book represents our XML structure
+type Book struct {
+	XMLName  xml.Name `xml:"book"`
+	Category string   `xml:"category,attr"`
+	Title    string   `xml:"title"`
+	Author   string   `xml:"author"`
+	Year     string   `xml:"year"`
+	Price    string   `xml:"price"`
+}
+
+const benchStr = `<bookstore xmlns:p="urn:schemas-books-com:prices">
+
+	<book category="COOKING">
+	  <title lang="en">Everyday Italian</title>
+	  <author>Giada De Laurentiis</author>
+	  <year>2005</year>
+	  <p:price>30.00</p:price>
+	</book>
+  
+	<book category="CHILDREN">
+	  <title lang="en">Harry Potter</title>
+	  <author>J K. Rowling</author>
+	  <year>2005</year>
+	  <p:price>29.99</p:price>
+	</book>
+  
+	<book category="WEB">
+	  <title lang="en">XQuery Kick Start</title>
+	  <author>James McGovern</author>
+	  <author>Per Bothner</author>
+	  <author>Kurt Cagle</author>
+	  <author>James Linn</author>
+	  <author>Vaidyanathan Nagarajan</author>
+	  <year>2003</year>
+	  <p:price>49.99</p:price>
+	</book>
+  
+	<book category="WEB">
+	  <title lang="en">Learning XML</title>
+	  <author>Erik T. Ray</author>
+	  <year>2003</year>
+	  <p:price>39.95</p:price>
+	</book>
+  
+  </bookstore>`
+
+type Buffer struct {
+	b []byte
+	i int
+}
+
+func (bf *Buffer) Read(b []byte) (int, error) {
+	if len(bf.b) == bf.i {
+		return 0, io.EOF
+	}
+
+	n := copy(b, bf.b[bf.i:])
+	bf.i += n
+	return n, nil
+}
+
+func (bf *Buffer) Reset() {
+	bf.i = 0
+}
+
+func BenchmarkFastXML(b *testing.B) {
+	sr := &Buffer{
+		b: []byte(benchStr),
+		i: 0,
+	}
+	for i := 0; i < b.N; i++ {
+		r := NewReader(sr)
+		benchFastXML(b, r)
+		sr.Reset()
+	}
+}
+
+func benchFastXML(b *testing.B, r *Reader) {
+	books := 0
+	book := Book{}
+	for r.Next() {
+		switch e := r.Element().(type) {
+		case *StartElement:
+			switch e.Name() {
+			case "book": // start reading a book
+				attr := e.Attrs().Get("category")
+				if attr != nil {
+					book.Category = attr.Value()
+				}
+			case "title": // You can capture the lang too using e.Attrs()
+				r.AssignNext(&book.Title)
+				// AssignNext will assign the next text found to book.Title
+			case "author":
+				r.AssignNext(&book.Author)
+			case "year":
+				r.AssignNext(&book.Year)
+			case "p:price":
+				r.AssignNext(&book.Price)
+			}
+		case *EndElement:
+			if e.Name() == "book" { // book parsed
+				books++
+			}
+		}
+	}
+	if r.Error() != nil && r.Error() != io.EOF {
+		b.Fatal(r.Error())
+	}
+	if books != 4 {
+		b.Fatalf("Expected 4 books. Got %d", books)
+	}
+}
+
+func BenchmarkXML(b *testing.B) {
+	sr := &Buffer{
+		b: []byte(benchStr),
+		i: 0,
+	}
+	for i := 0; i < b.N; i++ {
+		d := xml.NewDecoder(sr)
+		benchXML(b, d)
+		sr.Reset()
+	}
+}
+
+func benchXML(b *testing.B, d *xml.Decoder) {
+	books := 0
+	book := Book{}
+	for {
+		tok, err := d.Token()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+
+			b.Fatal(err)
+		}
+
+		switch e := tok.(type) {
+		case xml.StartElement:
+			switch e.Name.Local {
+			case "book":
+				for _, attr := range e.Attr {
+					if attr.Name.Local == "category" {
+						book.Category = attr.Value
+					}
+				}
+			case "title":
+				d.DecodeElement(&book.Title, &e)
+			case "author":
+				d.DecodeElement(&book.Author, &e)
+			case "year":
+				d.DecodeElement(&book.Year, &e)
+			case "price":
+				d.DecodeElement(&book.Price, &e)
+			}
+		case xml.EndElement:
+			if e.Name.Local == "book" {
+				books++
+			}
+		}
+	}
+	if books != 4 {
+		b.Fatalf("Expected 4 books. Got %d", books)
+	}
 }
