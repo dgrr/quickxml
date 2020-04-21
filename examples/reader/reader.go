@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dgrr/xml"
+	xml "github.com/dgrr/quickxml"
 )
 
 // Book represents our XML structure
