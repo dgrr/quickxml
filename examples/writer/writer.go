@@ -4,7 +4,7 @@ package main
 import (
 	"os"
 
-	"github.com/dgrr/xml"
+	xml "github.com/dgrr/quickxml"
 )
 
 func main() {
