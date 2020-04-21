@@ -194,10 +194,12 @@ func benchFastXML(b *testing.B, r *Reader) {
 			case "p:price":
 				r.AssignNext(&book.Price)
 			}
+			ReleaseStart(e)
 		case *EndElement:
 			if e.Name() == "book" { // book parsed
 				books++
 			}
+			ReleaseEnd(e)
 		}
 	}
 	if r.Error() != nil && r.Error() != io.EOF {
