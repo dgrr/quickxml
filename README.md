@@ -1,4 +1,4 @@
-# XML
+# Quick XML
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/dgrr/xml)](https://goreportcard.com/report/github.com/dgrr/xml)
 [![Build Status](https://travis-ci.com/dgrr/xml.svg?branch=master)](https://travis-ci.com/dgrr/xml)
@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dgrr/xml"
+	xml "github.com/dgrr/quickxml"
 )
 
 // Book represents our XML structure
