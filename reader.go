@@ -16,7 +16,7 @@ type Reader struct {
 // NewReader returns a initialized reader.
 func NewReader(r io.Reader) *Reader {
 	return &Reader{
-		r: bufio.NewReader(r),
+		r: bufio.NewReaderSize(r, 2<<12),
 	}
 }
 

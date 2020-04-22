@@ -2,7 +2,6 @@ package xml
 
 import (
 	"bufio"
-	"bytes"
 )
 
 // KV represents an attr which is a key-value pair.
@@ -52,7 +51,12 @@ func (kv *KV) reset() {
 func (kv *KV) parse(r *bufio.Reader) error {
 	k, err := r.ReadBytes('=')
 	if err == nil {
-		kv.k = append(kv.k[:0], bytes.TrimRight(k[:len(k)-1], " \r\n")...)
+		n := len(k) - 2
+		for k[n] == ' ' {
+			n--
+		}
+
+		kv.k = append(kv.k[:0], k[:n+1]...)
 		var (
 			c byte
 			v []byte

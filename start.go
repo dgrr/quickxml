@@ -198,10 +198,7 @@ func (s *StartElement) parse(r *bufio.Reader) error {
 
 	for {
 		c, err = r.ReadByte()
-		if err != nil {
-			break
-		}
-		if c == ' ' || c == '>' {
+		if err != nil || c == ' ' || c == '>' {
 			break
 		}
 
