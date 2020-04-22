@@ -12,6 +12,19 @@ Most of the times working with XML is a painful task. Also, the Golang std libra
 
 PRs are welcome.
 
+# How QuickXML performs?
+
+
+![alt_text](https://github.com/dgrr/quickxml/blob/master/_imgs/alloc_time.png)
+
+The graph shows the amount of memory used (blue) represented in the left axis.
+And the time spent in seconds (red) represented in the right axis.
+
+As you can see, QuickXML is the fastest and the second one on memory usage.in
+
+# Example
+
+
 ```go
 package main
 
