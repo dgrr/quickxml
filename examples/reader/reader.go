@@ -12,7 +12,7 @@ import (
 type Book struct {
 	Category string
 	Title    string
-	Author   string
+	Authors  []string
 	Year     string
 	Price    string
 }
@@ -20,8 +20,8 @@ type Book struct {
 // String will print the book info in a string (for fmt)
 func (book Book) String() string {
 	return fmt.Sprintf(
-		"%s\n  Title: %s\n  Author: %s\n  Year: %s\n  Price: %s",
-		book.Category, book.Title, book.Author, book.Year, book.Price,
+		"%s\n  Title: %s\n  Authors: %s\n  Year: %s\n  Price: %s",
+		book.Category, book.Title, strings.Join(book.Authors, ", "), book.Year, book.Price,
 	)
 }
 
@@ -77,7 +77,9 @@ func main() {
 				r.AssignNext(&book.Title)
 				// AssignNext will assign the next text found to book.Title
 			case "author":
-				r.AssignNext(&book.Author)
+				next := len(book.Authors)
+				book.Authors = append(book.Authors, "")
+				r.AssignNext(&book.Authors[next])
 			case "year":
 				r.AssignNext(&book.Year)
 			case "p:price":
