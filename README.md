@@ -6,7 +6,7 @@
 
 QuickXML is a package to process XML files in an iterative way. It doesn't use reflect so you'll need to work a little more :D
 
-Most of the times working with XML is a painful task. Also, the Golang std library doesn't help too much. Neither is fast nor has good doc. This library just tries to process XML files in a iterative way, ignoring most of the common errors in XML (like non-closed tags or optional tags). So it just detects when a tag is being open and closed, and doesn't have control whether the tag X has been open before closed or viceversa.
+Most of the times working with XML is a painful task. Also, the Golang std library doesn't help too much. Neither is fast nor has good doc. This library just tries to process XML files in an iterative way, ignoring most of the common errors in XML (not closing tags or putting optional tags). It just detects when a tag is open and closed (if it's closed), and it doesn't have control whether the tag X has been open before Y was closed or viceversa.
 
 **IMPORTANT NOTE: This package doesn't provide a fully featured XML. It has been created for XLSX parsing.**
 
